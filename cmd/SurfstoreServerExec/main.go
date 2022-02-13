@@ -67,5 +67,6 @@ func main() {
 }
 
 func startServer(hostAddr string, serviceType string, blockStoreAddr string) error {
+	// panic("todo")
 	panic("todo")
 }
