@@ -2,8 +2,6 @@ package surfstore
 
 import (
 	context "context"
-	"crypto/sha256"
-	"encoding/hex"
 )
 
 type BlockStore struct {
@@ -19,10 +17,11 @@ func (bs *BlockStore) GetBlock(ctx context.Context, blockHash *BlockHash) (*Bloc
 
 func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, error) {
 	// panic("todo")
-	hash := sha256.New()
-	hash.Write(block.BlockData)
-	hashBytes := hash.Sum(nil)
-	hashcode := hex.EncodeToString(hashBytes)
+	// hash := sha256.New()
+	// hash.Write(block.BlockData)
+	// hashBytes := hash.Sum(nil)
+	// hashcode := hex.EncodeToString(hashBytes)
+	hashcode := GetBlockHashString(block.BlockData)
 	bs.BlockMap[hashcode] = block
 
 	return &Success{Flag: true}, nil
@@ -34,7 +33,7 @@ func (bs *BlockStore) HasBlocks(ctx context.Context, blockHashesIn *BlockHashes)
 	// panic("todo")
 	blockHashesOut := &BlockHashes{}
 	for _, blockHash := range blockHashesIn.Hashes {
-		if _, ok := bs.BlockMap[blockHash]; ok {
+		if _, check := bs.BlockMap[blockHash]; check {
 			blockHashesOut.Hashes = append(blockHashesOut.Hashes, blockHash)
 		}
 	}

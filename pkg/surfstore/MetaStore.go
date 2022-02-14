@@ -2,7 +2,6 @@ package surfstore
 
 import (
 	context "context"
-	"errors"
 
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
@@ -24,13 +23,14 @@ func (m *MetaStore) UpdateFile(ctx context.Context, fileMetaData *FileMetaData) 
 	// panic("todo")
 	filename := fileMetaData.Filename
 	newVersion := &Version{}
-	if _, ok := m.FileMetaMap[filename]; ok {
+	if _, check := m.FileMetaMap[filename]; check {
 		if fileMetaData.Version == m.FileMetaMap[filename].Version+1 {
 			m.FileMetaMap[filename] = fileMetaData
 			newVersion.Version = fileMetaData.Version
 			return newVersion, nil
 		} else {
-			return nil, errors.New("version = -1")
+			newVersion.Version = -1
+			return newVersion, nil
 		}
 	} else {
 		m.FileMetaMap[filename] = fileMetaData
