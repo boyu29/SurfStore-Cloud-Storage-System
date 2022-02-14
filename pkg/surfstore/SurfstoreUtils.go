@@ -26,7 +26,7 @@ func ClientSync(client RPCClient) {
 	}
 
 	// check index.txt
-	idxDir := ConcatPath(client.BaseDir, "index.txt")
+	idxDir := client.BaseDir + "/" + "index.txt"
 	_, idxPatherr := os.Stat(idxDir)
 	if errors.Is(idxPatherr, fs.ErrNotExist) {
 		idxfile, _ := os.Create(idxDir)

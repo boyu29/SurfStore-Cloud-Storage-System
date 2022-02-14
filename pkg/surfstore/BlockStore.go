@@ -2,6 +2,7 @@ package surfstore
 
 import (
 	context "context"
+	"sync"
 )
 
 type BlockStore struct {
@@ -11,7 +12,11 @@ type BlockStore struct {
 
 func (bs *BlockStore) GetBlock(ctx context.Context, blockHash *BlockHash) (*Block, error) {
 	// Retrieves a block indexed by hash value h
-	// usage: b = GetBlock(h)
+
+	lock := sync.Mutex{}
+	lock.Lock()
+	defer lock.Unlock()
+
 	return bs.BlockMap[blockHash.Hash], nil
 }
 
@@ -21,6 +26,10 @@ func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, err
 	// hash.Write(block.BlockData)
 	// hashBytes := hash.Sum(nil)
 	// hashcode := hex.EncodeToString(hashBytes)
+
+	lock := sync.Mutex{}
+	lock.Lock()
+	defer lock.Unlock()
 	hashcode := GetBlockHashString(block.BlockData)
 	bs.BlockMap[hashcode] = block
 
@@ -31,6 +40,11 @@ func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, err
 // subset of in that are stored in the key-value store
 func (bs *BlockStore) HasBlocks(ctx context.Context, blockHashesIn *BlockHashes) (*BlockHashes, error) {
 	// panic("todo")
+
+	lock := sync.Mutex{}
+	lock.Lock()
+	defer lock.Unlock()
+
 	blockHashesOut := &BlockHashes{}
 	for _, blockHash := range blockHashesIn.Hashes {
 		if _, check := bs.BlockMap[blockHash]; check {
