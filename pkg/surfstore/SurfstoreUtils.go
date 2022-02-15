@@ -103,8 +103,9 @@ func ClientSync(client RPCClient) {
 
 }
 
-func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileInfoMap map[string]*FileMetaData) (newFileInfoMap map[string]*FileMetaData, changeFlag map[string]string) {
-
+func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileInfoMap map[string]*FileMetaData) (returnmap map[string]*FileMetaData, returnFlag map[string]string) {
+	newFileInfoMap := make(map[string]*FileMetaData)
+	changeFlag := make(map[string]string)
 	// handle files in the base directory: new to index.txt or already exists in index.txt(modified or unchanged)
 	for filename, fileosInfo := range dirFileInfoMap {
 		// get content of the files from the base directory
@@ -113,37 +114,97 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 		}
 
 		// generate hashlist for the file content
-		filecontentHashlist := genHashlist(client, filename, fileosInfo) // [h0 h1 h2 ... hn]
+		dirfilecontentHashlist := genHashlist(client, filename, fileosInfo) // [h0 h1 h2 ... hn]
+		var newfileMetaData *FileMetaData
 
 		// check if this file exists in oldFileInforMap(modified/unchanged)
 		if oldfileMetaData, check := oldFileInfoMap[filename]; check {
 			// if exists
 			//check if it's modified
-			changeflg := checkChange(filecontentHashlist, oldfileMetaData.BlockHashList) // true: changed | false: unchanged
+			changeflg := checkChange(dirfilecontentHashlist, oldfileMetaData.BlockHashList) // true: changed | false: unchanged
 			if changeflg {
+				// if modified --> newfilemetadata: version+1
 				changeFlag[filename] = "modified"
-				newfileMetaData := &FileMetaData{}
+				// modifiedfileMetaData := &FileMetaData{}
+				// modifiedfileMetaData.Filename = oldfileMetaData.Filename
+				// modifiedfileMetaData.Version = oldfileMetaData.Version + 1
+				//// modifiedfileMetaData.BlockHashList = dirfilecontentHashlist
+				// for i, hashcode := range dirfilecontentHashlist {
+				// 	modifiedfileMetaData.BlockHashList[i] = hashcode
+				// }
+				// newFileInfoMap[filename] = modifiedfileMetaData
+
 				newfileMetaData.Filename = oldfileMetaData.Filename
 				newfileMetaData.Version = oldfileMetaData.Version + 1
-				newfileMetaData.BlockHashList = filecontentHashlist
-				newFileInfoMap[filename] = newfileMetaData
+				for i, hashcode := range dirfilecontentHashlist {
+					newfileMetaData.BlockHashList[i] = hashcode
+				}
 			} else {
+				// if not modified --> add data to newfilemetadatamap
 				changeFlag[filename] = "unmodified"
-				newFileInfoMap[filename] = oldfileMetaData
+				// newFileInfoMap[filename] = oldfileMetaData
+
+				// unmodifiedfileMetaData := &FileMetaData{}
+				// unmodifiedfileMetaData.Filename = oldfileMetaData.Filename
+				// unmodifiedfileMetaData.Version = oldfileMetaData.Version
+				// for i, hashcode := range dirfilecontentHashlist {
+				// 	unmodifiedfileMetaData.BlockHashList[i] = hashcode
+				// }
+				// newFileInfoMap[filename] = unmodifiedfileMetaData
+
+				newfileMetaData.Filename = oldfileMetaData.Filename
+				newfileMetaData.Version = oldfileMetaData.Version
+				for i, hashcode := range dirfilecontentHashlist {
+					newfileMetaData.BlockHashList[i] = hashcode
+				}
 			}
 		} else {
 			// if not exists(new file)
 			changeFlag[filename] = "newfile"
-			newfileMetaData := &FileMetaData{}
+			// newfileMetaData := &FileMetaData{}
+			// newfileMetaData.Filename = filename
+			// newfileMetaData.Version = 1
+			// newfileMetaData.BlockHashList = dirfilecontentHashlist
+			// newFileInfoMap[filename] = newfileMetaData
+
 			newfileMetaData.Filename = filename
 			newfileMetaData.Version = 1
-			newfileMetaData.BlockHashList = filecontentHashlist
+			for i, hashcode := range dirfilecontentHashlist {
+				newfileMetaData.BlockHashList[i] = hashcode
+			}
+
+		}
+		newFileInfoMap[filename] = newfileMetaData
+	}
+
+	// handle files does not exists in the index.txt(deleted)
+	for filename, oldfilemetadata := range oldFileInfoMap {
+		var newfileMetaData *FileMetaData
+		if _, ok := dirFileInfoMap[filename]; !ok {
+			// for files recorded in index.txt but not exists in client --> file is deleted
+			if len(oldfilemetadata.BlockHashList) == 1 && oldfilemetadata.BlockHashList[0] == "0" {
+				// recorded as deleted
+				changeFlag[filename] = "unmodified"
+				newfileMetaData.Filename = oldfilemetadata.Filename
+				newfileMetaData.Version = oldfilemetadata.Version
+				for i, hashcode := range oldfilemetadata.BlockHashList {
+					newfileMetaData.BlockHashList[i] = hashcode
+				}
+			} else {
+				// deleted in client but exist in index.txt --> update newfilemetadata marked as deleted
+				changeFlag[filename] = "deleted"
+				newfileMetaData.Filename = oldfilemetadata.Filename
+				newfileMetaData.Version = oldfilemetadata.Version + 1
+				zerohash := make([]string, 1)
+				zerohash[0] = "0"
+				newfileMetaData.BlockHashList = zerohash
+			}
 			newFileInfoMap[filename] = newfileMetaData
 		}
 	}
 
 	// handle files does not exists in the index.txt(deleted)
-	handleDelFiles(&newFileInfoMap, dirFileInfoMap, oldFileInfoMap, &changeFlag)
+	// handleDelFiles(&newFileInfoMap, dirFileInfoMap, oldFileInfoMap, &changeFlag)
 
 	return newFileInfoMap, changeFlag
 }
@@ -174,7 +235,7 @@ func genHashlist(client RPCClient, filename string, fileosInfo os.FileInfo) (has
 	return hashlist
 }
 
-func checkChange(filehashlist []string, oldidxfilehashlist []string) (changeflg bool) {
+func checkChange(filehashlist []string, oldidxfilehashlist []string) bool {
 	if len(filehashlist) == len(oldidxfilehashlist) {
 		for i := 0; i < len(filehashlist); i++ {
 			if oldidxfilehashlist[i] != filehashlist[i] {
