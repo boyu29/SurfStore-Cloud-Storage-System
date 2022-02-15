@@ -192,7 +192,9 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 			}
 			fmt.Println("************** End handle new files **************")
 		}
+		fmt.Println("************** Assign to map **************")
 		newFileInfoMap[filename] = newfileMetaData
+		fmt.Println("************** Finish to map **************")
 	}
 
 	// handle files does not exists in the index.txt(deleted)
