@@ -40,7 +40,7 @@ func ClientSync(client RPCClient) {
 		log.Println("load local file meta data failed")
 	}
 
-	fmt.Println("************* Ready to get ClientFileInforMap *************")
+	// fmt.Println("************* Ready to get ClientFileInforMap *************")
 
 	// scan files in local and update the local fileMetaDataMap for index.txt
 	clientFileInfoMap, changeFlag := idxUpdate(client, dirfileMap, oldFileInfoMap)
@@ -48,21 +48,17 @@ func ClientSync(client RPCClient) {
 	// PrintMetaMap(clientFileInfoMap)
 
 	// get file from server
-	fmt.Println("------------- start get file from server -------------")
 	serverFileInfoMap := make(map[string]*FileMetaData)
-	fmt.Println("------------- GetFileInfoMap -------------")
 	getserverFileInfoMapErr := client.GetFileInfoMap(&serverFileInfoMap)
 	if getserverFileInfoMapErr != nil {
 		log.Println("get file infor map from server failed: ", getserverFileInfoMapErr)
 	}
-	fmt.Println("------------- Finish GetFileInfoMap -------------")
-	fmt.Println(len(serverFileInfoMap))
 
 	// update file to server, update new version file to client
 	// 1 file in both client & server
 	// 2 file in client, not in server
 	for filename, localFileMetaData := range clientFileInfoMap {
-		fmt.Println("------------- start update file to server, update new version file to client-------------")
+		// fmt.Println("------------- start update file to server, update new version file to client-------------")
 		// check if the server has this file
 		if _, ok := serverFileInfoMap[filename]; ok {
 			// server has the file
@@ -356,7 +352,7 @@ func upload(client RPCClient, filename string, clientFileMetaData *FileMetaData)
 	// fmt.Println("-*-*-*-*-* Start Update File *-*-*-*-*-")
 	upderr := client.UpdateFile(clientFileMetaData, &clientFileMetaData.Version)
 	if upderr != nil {
-		fmt.Println("update file failed")
+		log.Println("update file failed")
 	}
 	if clientFileMetaData.Version == -1 {
 		// fmt.Println("client file is too old, needs updating")
