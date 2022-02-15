@@ -91,6 +91,7 @@ func ClientSync(client RPCClient) {
 			// server does not have the file --> update it to the server file info map
 			// newFileMetaData := &FileMetaData{}
 			// updateServerFileInfoMap(localFileMetaData, newFileMetaData)
+			serverFileInfoMap := make(map[string]*FileMetaData)
 			serverFileInfoMap[filename] = &FileMetaData{}
 			updateServerFileInfoMap(localFileMetaData, serverFileInfoMap[filename])
 			fmt.Println("\t", serverFileInfoMap[filename].Filename, serverFileInfoMap[filename].Version)
