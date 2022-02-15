@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"os"
+	reflect "reflect"
 )
 
 // Implement the logic for a client syncing with the server here.
@@ -56,6 +57,9 @@ func ClientSync(client RPCClient) {
 		log.Println("get file infor map from server failed: ", getserverFileInfoMapErr)
 	}
 	fmt.Println("------------- Finish GetFileInfoMap -------------")
+	fmt.Println(reflect.TypeOf(serverFileInfoMap))
+	fmt.Println(len(serverFileInfoMap))
+	serverFileInfoMap["xxxxx"] = &FileMetaData{}
 	fmt.Println(len(serverFileInfoMap))
 
 	// update file to server, update new version file to client
@@ -89,9 +93,7 @@ func ClientSync(client RPCClient) {
 		} else {
 			fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
 			// server does not have the file --> update it to the server file info map
-			// newFileMetaData := &FileMetaData{}
-			// updateServerFileInfoMap(localFileMetaData, newFileMetaData)
-			serverFileInfoMap := make(map[string]*FileMetaData)
+			// serverFileInfoMap := make(map[string]*FileMetaData)
 			serverFileInfoMap[filename] = &FileMetaData{}
 			updateServerFileInfoMap(localFileMetaData, serverFileInfoMap[filename])
 			fmt.Println("\t", serverFileInfoMap[filename].Filename, serverFileInfoMap[filename].Version)
