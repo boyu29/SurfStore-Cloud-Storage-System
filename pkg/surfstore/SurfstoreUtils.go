@@ -89,11 +89,13 @@ func ClientSync(client RPCClient) {
 		} else {
 			fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
 			// server does not have the file --> update it to the server file info map
-			// newFileMetaData := &FileMetaData{}
-			// newFileMetaData := &FileMetaData{}
 			newFileMetaData := &FileMetaData{}
 			updateServerFileInfoMap(localFileMetaData, newFileMetaData)
-			serverFileInfoMap[filename] = newFileMetaData
+			// serverFileInfoMap[filename] = &FileMetaData{}
+			fmt.Println("\t", newFileMetaData.Filename, newFileMetaData.Version)
+			for _, blockHash := range newFileMetaData.BlockHashList {
+				fmt.Println("\t", blockHash)
+			}
 			PrintMetaMap(serverFileInfoMap)
 			fmt.Println("------------- start upload new local file to server -------------")
 			err := upload(client, filename, localFileMetaData)
@@ -330,19 +332,11 @@ func updateClientFileInfoMap(serverFileMetaData *FileMetaData) (newClientFileMet
 
 func updateServerFileInfoMap(localFileMetaData *FileMetaData, newServerFileMetaData *FileMetaData) {
 	fmt.Println("-_*_*_*_*_*_*_ Start updateServerFileInfoMap -_*_*_*_*_*_*_")
-	fmt.Println(localFileMetaData.Filename)
-	fmt.Println(localFileMetaData.Version)
-	fmt.Println(len(localFileMetaData.BlockHashList))
-	// ServerFileMetaData := &FileMetaData{}
 	newServerFileMetaData.Filename = localFileMetaData.Filename
 	newServerFileMetaData.Version = localFileMetaData.Version
 	newServerFileMetaData.BlockHashList = make([]string, len(localFileMetaData.BlockHashList))
 	for i, hashcode := range localFileMetaData.BlockHashList {
 		newServerFileMetaData.BlockHashList[i] = hashcode
-	}
-	fmt.Println("\t", newServerFileMetaData.Filename, newServerFileMetaData.Version)
-	for _, blockHash := range newServerFileMetaData.BlockHashList {
-		fmt.Println("\t", blockHash)
 	}
 	fmt.Println("-_*_*_*_*_*_*_ Finish updateServerFileInfoMap -_*_*_*_*_*_*_")
 	// return ServerFileMetaData
