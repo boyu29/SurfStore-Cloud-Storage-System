@@ -86,9 +86,11 @@ func ClientSync(client RPCClient) {
 			}
 
 		} else {
-			fmt.Println("------------- start update new local file to server -------------")
+			fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
 			// server does not have the file --> update it to the server file info map
 			serverFileInfoMap[filename] = updateServerFileInfoMap(localFileMetaData)
+			PrintMetaMap(serverFileInfoMap)
+			fmt.Println("------------- start upload new local file to server -------------")
 			err := upload(client, filename, localFileMetaData)
 			if err != nil {
 				log.Println("upload failed")
