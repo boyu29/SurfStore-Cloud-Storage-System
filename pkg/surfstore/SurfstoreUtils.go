@@ -2,6 +2,7 @@ package surfstore
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"io/ioutil"
@@ -39,7 +40,7 @@ func ClientSync(client RPCClient) {
 		log.Println("load local file meta data failed")
 	}
 
-	log.Println("************* Ready to get ClientFileInforMap *************")
+	fmt.Println("************* Ready to get ClientFileInforMap *************")
 
 	// scan files in local and update the local fileMetaDataMap for index.txt
 	clientFileInfoMap, changeFlag := idxUpdate(client, dirfileMap, oldFileInfoMap)
