@@ -45,7 +45,7 @@ func ClientSync(client RPCClient) {
 	// scan files in local and update the local fileMetaDataMap for index.txt
 	clientFileInfoMap, changeFlag := idxUpdate(client, dirfileMap, oldFileInfoMap)
 
-	PrintMetaMap(clientFileInfoMap)
+	// PrintMetaMap(clientFileInfoMap)
 
 	// get file from server
 	fmt.Println("------------- start get file from server -------------")
@@ -86,13 +86,13 @@ func ClientSync(client RPCClient) {
 			}
 
 		} else {
-			fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
+			// fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
 			// server does not have the file --> update it to the server file info map
 			serverFileInfoMap[filename] = &FileMetaData{}
 			updateServerFileInfoMap(localFileMetaData, serverFileInfoMap[filename])
-			PrinMetaData(serverFileInfoMap[filename])
-			PrintMetaMap(serverFileInfoMap)
-			fmt.Println("------------- start upload new local file to server -------------")
+			// PrintMetaData(serverFileInfoMap[filename])
+			// PrintMetaMap(serverFileInfoMap)
+			// fmt.Println("------------- start upload new local file to server -------------")
 			err := upload(client, filename, clientFileInfoMap[filename])
 			if err != nil {
 				log.Println("upload failed")
@@ -121,8 +121,7 @@ func ClientSync(client RPCClient) {
 func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileInfoMap map[string]*FileMetaData) (returnmap map[string]*FileMetaData, returnFlag map[string]string) {
 	newFileInfoMap := make(map[string]*FileMetaData)
 	changeFlag := make(map[string]string)
-	fmt.Println("************** Check the num of local files **************")
-	// fmt.Println(len(dirFileInfoMap))
+	// fmt.Println("************** Check the num of local files **************")
 	// handle files in the base directory: new to index.txt or already exists in index.txt(modified or unchanged)
 	for filename, fileosInfo := range dirFileInfoMap {
 		// get content of the files from the base directory
@@ -131,90 +130,52 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 		}
 
 		// generate hashlist for the file content
-		fmt.Println("************** Generating Hash List **************")
 		dirfilecontentHashlist := genHashlist(client, filename, fileosInfo) // [h0 h1 h2 ... hn]
-		fmt.Println("************** Finish Generating Hash List **************")
 		newfileMetaData := &FileMetaData{}
 
 		// check if this file exists in oldFileInforMap(modified/unchanged)
-		fmt.Println("************** Check if this file exists in oldFileInforMap **************")
+		// fmt.Println("************** Check if this file exists in oldFileInforMap **************")
 		if oldfileMetaData, check := oldFileInfoMap[filename]; check {
 			// if exists
 			//check if it's modified
 			changeflg := checkChange(dirfilecontentHashlist, oldfileMetaData.BlockHashList) // true: changed | false: unchanged
-			fmt.Println("************** Check checkChange **************")
 			if changeflg {
 				// if modified --> newfilemetadata: version+1
 				changeFlag[filename] = "modified"
-				fmt.Println("************** Begin Handle  changed files **************")
+				// fmt.Println("************** Begin Handle  changed files **************")
 				newfileMetaData.Filename = oldfileMetaData.Filename
 				newfileMetaData.Version = oldfileMetaData.Version + 1
 				newfileMetaData.BlockHashList = make([]string, len(dirfilecontentHashlist))
 				for i, hashcode := range dirfilecontentHashlist {
 					newfileMetaData.BlockHashList[i] = hashcode
 				}
-				fmt.Println("************** End handle changed files **************")
 			} else {
 				// if not modified --> add data to newfilemetadatamap
 				changeFlag[filename] = "unmodified"
-				fmt.Println("************** Begin handle unchanged files **************")
+				// fmt.Println("************** Begin handle unchanged files **************")
 				newfileMetaData.Filename = oldfileMetaData.Filename
 				newfileMetaData.Version = oldfileMetaData.Version
 				newfileMetaData.BlockHashList = make([]string, len(dirfilecontentHashlist))
 				for i, hashcode := range dirfilecontentHashlist {
 					newfileMetaData.BlockHashList[i] = hashcode
 				}
-				fmt.Println("************** End handle unchanged files **************")
 			}
 		} else {
 			// if not exists(new file)
 			changeFlag[filename] = "newfile"
-			fmt.Println("************** Begin Handle new files **************")
+			// fmt.Println("************** Begin handle new files **************")
 			newfileMetaData.Filename = filename
-			fmt.Println("************** finish add filename **************")
 			newfileMetaData.Version = 1
-			fmt.Println("************** finish add version **************")
 			newfileMetaData.BlockHashList = make([]string, len(dirfilecontentHashlist))
 			for i, hashcode := range dirfilecontentHashlist {
 				newfileMetaData.BlockHashList[i] = hashcode
 			}
-			fmt.Println("************** End handle new files **************")
 		}
-		fmt.Println("************** Assign to map **************")
 		newFileInfoMap[filename] = newfileMetaData
-		fmt.Println("************** Finish assigning to map **************")
 	}
 
 	// handle files does not exists in the index.txt(deleted)
-	/*
-		for filename, oldfilemetadata := range oldFileInfoMap {
-			var newfileMetaData *FileMetaData
-			if _, ok := dirFileInfoMap[filename]; !ok {
-				// for files recorded in index.txt but not exists in client --> file is deleted
-				if len(oldfilemetadata.BlockHashList) == 1 && oldfilemetadata.BlockHashList[0] == "0" {
-					// recorded as deleted
-					changeFlag[filename] = "unmodified"
-					newfileMetaData.Filename = oldfilemetadata.Filename
-					newfileMetaData.Version = oldfilemetadata.Version
-					// for i, hashcode := range oldfilemetadata.BlockHashList {
-					// 	newfileMetaData.BlockHashList[i] = hashcode
-					// }
-					newfileMetaData.BlockHashList = make([]string, 1)
-					newfileMetaData.BlockHashList[0] = "0"
-				} else {
-					// deleted in client but exist in index.txt --> update newfilemetadata marked as deleted
-					changeFlag[filename] = "deleted"
-					newfileMetaData.Filename = oldfilemetadata.Filename
-					newfileMetaData.Version = oldfilemetadata.Version + 1
-					newfileMetaData.BlockHashList = make([]string, 1)
-					newfileMetaData.BlockHashList[0] = "0"
-				}
-				newFileInfoMap[filename] = newfileMetaData
-			}
-		}*/
-
-	// handle files does not exists in the index.txt(deleted)
-	fmt.Println("************** Check HandleDelFiles **************")
+	// fmt.Println("************** Check HandleDelFiles **************")
 	handleDelFiles(&newFileInfoMap, dirFileInfoMap, oldFileInfoMap, &changeFlag)
 
 	return newFileInfoMap, changeFlag
@@ -271,18 +232,10 @@ func handleDelFiles(newFileInfoMap *map[string]*FileMetaData, dirFileInfoMap map
 				// if it has been recorded as deleted in the index.txt
 				(*changeFlag)[filename] = "unmodified"
 				newfileMetaData.Version = fileMetaData.Version
-				// newfileMetaData.Filename = fileMetaData.Filename
-				// newfileMetaData.BlockHashList = make([]string, 1)
-				// newfileMetaData.BlockHashList[0] = "0"
-				// (*newFileInfoMap)[filename] = newfileMetaData
 			} else {
 				// if it's deleted in base dir but not deleted in the index.txt
 				(*changeFlag)[filename] = "modified"
 				newfileMetaData.Version = fileMetaData.Version + 1
-				// newfileMetaData.Filename = filename
-				// newfileMetaData.BlockHashList = make([]string, 1)
-				// newfileMetaData.BlockHashList[0] = "0"
-				// (*newFileInfoMap)[filename] = newfileMetaData
 			}
 			(*newFileInfoMap)[filename] = newfileMetaData
 		}
@@ -300,14 +253,12 @@ func updateClientFileInfoMap(serverFileMetaData *FileMetaData, newClientFileMeta
 }
 
 func updateServerFileInfoMap(localFileMetaData *FileMetaData, newServerFileMetaData *FileMetaData) {
-	fmt.Println("-_*_*_*_*_*_*_ Start updateServerFileInfoMap -_*_*_*_*_*_*_")
 	newServerFileMetaData.Filename = localFileMetaData.Filename
 	newServerFileMetaData.Version = localFileMetaData.Version
 	newServerFileMetaData.BlockHashList = make([]string, len(localFileMetaData.BlockHashList))
 	for i, hashcode := range localFileMetaData.BlockHashList {
 		newServerFileMetaData.BlockHashList[i] = hashcode
 	}
-	fmt.Println("-_*_*_*_*_*_*_ Finish updateServerFileInfoMap -_*_*_*_*_*_*_")
 }
 
 // download(client, filename, serverFileMetaData)
@@ -379,7 +330,7 @@ func upload(client RPCClient, filename string, clientFileMetaData *FileMetaData)
 	numofblock := int(math.Ceil(float64(file.Size()) / float64(client.BlockSize)))
 
 	// generate & put block
-	fmt.Println("-*-*-*-*-* Start Put Block *-*-*-*-*-")
+	// fmt.Println("-*-*-*-*-* Start Put Block *-*-*-*-*-")
 	for i := 0; i < numofblock; i++ {
 		var block Block
 		block.BlockData = make([]byte, client.BlockSize)
@@ -402,13 +353,13 @@ func upload(client RPCClient, filename string, clientFileMetaData *FileMetaData)
 		}
 	}
 
-	fmt.Println("-*-*-*-*-* Start Update File *-*-*-*-*-")
+	// fmt.Println("-*-*-*-*-* Start Update File *-*-*-*-*-")
 	upderr := client.UpdateFile(clientFileMetaData, &clientFileMetaData.Version)
 	if upderr != nil {
 		fmt.Println("update file failed")
 	}
 	if clientFileMetaData.Version == -1 {
-		fmt.Println("client file is too old, needs updating")
+		// fmt.Println("client file is too old, needs updating")
 		newServerMap := make(map[string]*FileMetaData)
 		geterr := client.GetFileInfoMap(&newServerMap)
 		if geterr != nil {
@@ -416,13 +367,13 @@ func upload(client RPCClient, filename string, clientFileMetaData *FileMetaData)
 		}
 		updateClientFileInfoMap(clientFileMetaData, newServerMap[clientFileMetaData.Filename])
 	}
-	fmt.Println("-*-*-*-*-* End Update File *-*-*-*-*-")
+	// fmt.Println("-*-*-*-*-* End Update File *-*-*-*-*-")
 
 	return err
 
 }
 
-func PrinMetaData(fileMetaData *FileMetaData) {
+func PrintMetaData(fileMetaData *FileMetaData) {
 	fmt.Println("\t", fileMetaData.Filename, fileMetaData.Version)
 	for _, blockHash := range fileMetaData.BlockHashList {
 		fmt.Println("\t", blockHash)
