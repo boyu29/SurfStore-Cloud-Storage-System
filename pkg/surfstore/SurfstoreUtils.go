@@ -9,7 +9,6 @@ import (
 	"log"
 	"math"
 	"os"
-	reflect "reflect"
 )
 
 // Implement the logic for a client syncing with the server here.
@@ -57,9 +56,6 @@ func ClientSync(client RPCClient) {
 		log.Println("get file infor map from server failed: ", getserverFileInfoMapErr)
 	}
 	fmt.Println("------------- Finish GetFileInfoMap -------------")
-	fmt.Println(reflect.TypeOf(serverFileInfoMap))
-	fmt.Println(len(serverFileInfoMap))
-	serverFileInfoMap["xxxxx"] = &FileMetaData{}
 	fmt.Println(len(serverFileInfoMap))
 
 	// update file to server, update new version file to client
@@ -93,16 +89,12 @@ func ClientSync(client RPCClient) {
 		} else {
 			fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
 			// server does not have the file --> update it to the server file info map
-			// serverFileInfoMap := make(map[string]*FileMetaData)
 			serverFileInfoMap[filename] = &FileMetaData{}
 			updateServerFileInfoMap(localFileMetaData, serverFileInfoMap[filename])
-			fmt.Println("\t", serverFileInfoMap[filename].Filename, serverFileInfoMap[filename].Version)
-			for _, blockHash := range serverFileInfoMap[filename].BlockHashList {
-				fmt.Println("\t", blockHash)
-			}
+			PrinMetaData(serverFileInfoMap[filename])
 			PrintMetaMap(serverFileInfoMap)
 			fmt.Println("------------- start upload new local file to server -------------")
-			err := upload(client, filename, localFileMetaData)
+			err := upload(client, filename, clientFileInfoMap[filename])
 			if err != nil {
 				log.Println("upload failed")
 			}
@@ -415,6 +407,7 @@ func upload(client RPCClient, filename string, clientFileMetaData *FileMetaData)
 	numofblock := int(math.Ceil(float64(file.Size()) / float64(client.BlockSize)))
 
 	// generate & put block
+	fmt.Println("-*-*-*-*-* Start Put Block *-*-*-*-*-")
 	for i := 0; i < numofblock; i++ {
 		var block Block
 		block.BlockData = make([]byte, client.BlockSize)
@@ -436,6 +429,30 @@ func upload(client RPCClient, filename string, clientFileMetaData *FileMetaData)
 			log.Println("put block failed")
 		}
 	}
+
+	fmt.Println("-*-*-*-*-* Start Update File *-*-*-*-*-")
+	upderr := client.UpdateFile(clientFileMetaData, &clientFileMetaData.Version)
+	if upderr != nil {
+		fmt.Println("update file failed")
+	}
+	if clientFileMetaData.Version == -1 {
+		fmt.Println("client file is too old, needs updating")
+		newServerMap := make(map[string]*FileMetaData)
+		geterr := client.GetFileInfoMap(&newServerMap)
+		if geterr != nil {
+			log.Println("get new file map failed")
+		}
+		// updateClientFileInfoMap()
+	}
+	fmt.Println("-*-*-*-*-* End Update File *-*-*-*-*-")
+
 	return err
 
+}
+
+func PrinMetaData(fileMetaData *FileMetaData) {
+	fmt.Println("\t", fileMetaData.Filename, fileMetaData.Version)
+	for _, blockHash := range fileMetaData.BlockHashList {
+		fmt.Println("\t", blockHash)
+	}
 }
