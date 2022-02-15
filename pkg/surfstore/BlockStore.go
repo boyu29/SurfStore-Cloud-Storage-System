@@ -3,7 +3,6 @@ package surfstore
 import (
 	context "context"
 	"errors"
-	"sync"
 )
 
 type BlockStore struct {
@@ -14,7 +13,7 @@ type BlockStore struct {
 func (bs *BlockStore) GetBlock(ctx context.Context, blockHash *BlockHash) (*Block, error) {
 	// Retrieves a block indexed by hash value h
 
-	lock := sync.Mutex{}
+	// lock := sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -28,7 +27,7 @@ func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, err
 	// hashBytes := hash.Sum(nil)
 	// hashcode := hex.EncodeToString(hashBytes)
 
-	lock := sync.Mutex{}
+	// lock := sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
 	hashcode := GetBlockHashString(block.BlockData)
@@ -46,7 +45,7 @@ func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, err
 func (bs *BlockStore) HasBlocks(ctx context.Context, blockHashesIn *BlockHashes) (*BlockHashes, error) {
 	// panic("todo")
 
-	lock := sync.Mutex{}
+	// lock := sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
 

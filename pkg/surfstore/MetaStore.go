@@ -2,10 +2,12 @@ package surfstore
 
 import (
 	context "context"
-	"sync"
+	sync "sync"
 
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
+
+var lock sync.Mutex
 
 type MetaStore struct {
 	FileMetaMap    map[string]*FileMetaData
@@ -16,7 +18,7 @@ type MetaStore struct {
 func (m *MetaStore) GetFileInfoMap(ctx context.Context, _ *emptypb.Empty) (*FileInfoMap, error) {
 	// panic("todo")
 
-	lock := sync.Mutex{}
+	// lock := sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -28,7 +30,7 @@ func (m *MetaStore) GetFileInfoMap(ctx context.Context, _ *emptypb.Empty) (*File
 func (m *MetaStore) UpdateFile(ctx context.Context, fileMetaData *FileMetaData) (*Version, error) {
 	// panic("todo")
 
-	lock := sync.Mutex{}
+	// lock := sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -53,7 +55,7 @@ func (m *MetaStore) UpdateFile(ctx context.Context, fileMetaData *FileMetaData) 
 func (m *MetaStore) GetBlockStoreAddr(ctx context.Context, _ *emptypb.Empty) (*BlockStoreAddr, error) {
 	// panic("todo")
 
-	lock := sync.Mutex{}
+	// lock := sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
 
