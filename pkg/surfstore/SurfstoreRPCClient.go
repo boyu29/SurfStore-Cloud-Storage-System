@@ -99,7 +99,11 @@ func (surfClient *RPCClient) GetFileInfoMap(serverFileInfoMap *map[string]*FileM
 		conn.Close()
 		return err
 	}
-	*serverFileInfoMap = sfmap.FileInfoMap
+	if sfmap == nil {
+		*serverFileInfoMap = make(map[string]*FileMetaData)
+	} else {
+		*serverFileInfoMap = sfmap.FileInfoMap
+	}
 
 	// close the connection
 	return conn.Close()
