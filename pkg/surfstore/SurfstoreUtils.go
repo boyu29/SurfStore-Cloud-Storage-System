@@ -64,7 +64,6 @@ func ClientSync(client RPCClient) {
 	for filename, localFileMetaData := range clientFileInfoMap {
 		fmt.Println("------------- start update file to server, update new version file to client-------------")
 		// check if the server has this file
-		newFileMetaData := &FileMetaData{}
 		if _, ok := serverFileInfoMap[filename]; ok {
 			// server has the file
 			serverFileMetaData := serverFileInfoMap[filename]
@@ -90,8 +89,9 @@ func ClientSync(client RPCClient) {
 			fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
 			// server does not have the file --> update it to the server file info map
 			// newFileMetaData := &FileMetaData{}
-			newFileMetaData = updateServerFileInfoMap(localFileMetaData)
-			serverFileInfoMap[filename] = newFileMetaData
+			serverFileInfoMap[filename] = &FileMetaData{}
+			serverFileInfoMap[filename] = updateServerFileInfoMap(localFileMetaData)
+			// serverFileInfoMap[filename] = newFileMetaData
 			PrintMetaMap(serverFileInfoMap)
 			fmt.Println("------------- start upload new local file to server -------------")
 			err := upload(client, filename, localFileMetaData)
