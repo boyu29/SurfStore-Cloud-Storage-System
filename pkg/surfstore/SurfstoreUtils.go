@@ -119,10 +119,13 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 		}
 
 		// generate hashlist for the file content
+		fmt.Println("************** Generating Hash List **************")
 		dirfilecontentHashlist := genHashlist(client, filename, fileosInfo) // [h0 h1 h2 ... hn]
+		fmt.Println("************** Finish Generating Hash List **************")
 		var newfileMetaData *FileMetaData
 
 		// check if this file exists in oldFileInforMap(modified/unchanged)
+		fmt.Println("************** Check if this file exists in oldFileInforMap **************")
 		if oldfileMetaData, check := oldFileInfoMap[filename]; check {
 			// if exists
 			//check if it's modified
