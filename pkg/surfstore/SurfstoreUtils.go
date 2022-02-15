@@ -48,11 +48,15 @@ func ClientSync(client RPCClient) {
 	PrintMetaMap(clientFileInfoMap)
 
 	// get file from server
+	fmt.Println("------------- start get file from server -------------")
 	serverFileInfoMap := make(map[string]*FileMetaData)
+	fmt.Println("------------- GetFileInfoMap -------------")
 	getserverFileInfoMapErr := client.GetFileInfoMap(&serverFileInfoMap)
 	if getserverFileInfoMapErr != nil {
 		log.Println("get file infor map from server failed: ", getserverFileInfoMapErr)
 	}
+	fmt.Println("------------- Finish GetFileInfoMap -------------")
+	fmt.Println(len(serverFileInfoMap))
 
 	// update file to server, update new version file to client
 	// 1 file in both client & server
