@@ -62,6 +62,7 @@ func ClientSync(client RPCClient) {
 	// 1 file in both client & server
 	// 2 file in client, not in server
 	for filename, localFileMetaData := range clientFileInfoMap {
+		fmt.Println("------------- start update file to server, update new version file to client-------------")
 		// check if the server has this file
 		if _, ok := serverFileInfoMap[filename]; ok {
 			// server has the file
@@ -85,6 +86,7 @@ func ClientSync(client RPCClient) {
 			}
 
 		} else {
+			fmt.Println("------------- start update new local file to server -------------")
 			// server does not have the file --> update it to the server file info map
 			serverFileInfoMap[filename] = updateServerFileInfoMap(localFileMetaData)
 			err := upload(client, filename, localFileMetaData)
@@ -151,6 +153,7 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 				fmt.Println("************** Begin Handle  changed files **************")
 				newfileMetaData.Filename = oldfileMetaData.Filename
 				newfileMetaData.Version = oldfileMetaData.Version + 1
+				newfileMetaData.BlockHashList = make([]string, len(dirfilecontentHashlist))
 				for i, hashcode := range dirfilecontentHashlist {
 					newfileMetaData.BlockHashList[i] = hashcode
 				}
@@ -170,6 +173,7 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 				fmt.Println("************** Begin handle unchanged files **************")
 				newfileMetaData.Filename = oldfileMetaData.Filename
 				newfileMetaData.Version = oldfileMetaData.Version
+				newfileMetaData.BlockHashList = make([]string, len(dirfilecontentHashlist))
 				for i, hashcode := range dirfilecontentHashlist {
 					newfileMetaData.BlockHashList[i] = hashcode
 				}
@@ -190,7 +194,6 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 			fmt.Println("************** finish add filename **************")
 			newfileMetaData.Version = 1
 			fmt.Println("************** finish add version **************")
-			fmt.Println(dirfilecontentHashlist[1])
 			newfileMetaData.BlockHashList = make([]string, len(dirfilecontentHashlist))
 			for i, hashcode := range dirfilecontentHashlist {
 				newfileMetaData.BlockHashList[i] = hashcode
@@ -288,17 +291,19 @@ func handleDelFiles(newFileInfoMap *map[string]*FileMetaData, dirFileInfoMap map
 				// newfileMetaData := &FileMetaData{}
 				newfileMetaData.Filename = filename
 				newfileMetaData.Version = fileMetaData.Version
+				newfileMetaData.BlockHashList = make([]string, len(fileMetaData.BlockHashList))
 				newfileMetaData.BlockHashList = fileMetaData.BlockHashList
 				(*newFileInfoMap)[filename] = newfileMetaData
 			} else {
 				// if it's deleted in base dir but not deleted in the index.txt
 				(*changeFlag)[filename] = "modified"
-				zerohash := make([]string, 1)
-				zerohash[0] = "0"
+				// zerohash := make([]string, 1)
+				// zerohash[0] = "0"
 				// newfileMetaData := &FileMetaData{}
 				newfileMetaData.Filename = filename
 				newfileMetaData.Version = fileMetaData.Version + 1
-				newfileMetaData.BlockHashList = zerohash
+				newfileMetaData.BlockHashList = make([]string, 1)
+				newfileMetaData.BlockHashList[0] = "0"
 				(*newFileInfoMap)[filename] = newfileMetaData
 			}
 		}
