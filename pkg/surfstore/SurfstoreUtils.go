@@ -90,7 +90,7 @@ func ClientSync(client RPCClient) {
 			// server does not have the file --> update it to the server file info map
 			// newFileMetaData := &FileMetaData{}
 			serverFileInfoMap[filename] = &FileMetaData{}
-			updateServerFileInfoMap(localFileMetaData, serverFileInfoMap[filename])
+			serverFileInfoMap[filename] = updateServerFileInfoMap(localFileMetaData)
 			// serverFileInfoMap[filename] = newFileMetaData
 			PrintMetaMap(serverFileInfoMap)
 			fmt.Println("------------- start upload new local file to server -------------")
@@ -326,24 +326,24 @@ func updateClientFileInfoMap(serverFileMetaData *FileMetaData) (newClientFileMet
 	return newClientFileMetaData
 }
 
-func updateServerFileInfoMap(localFileMetaData *FileMetaData, serverFileMetaData *FileMetaData) {
+func updateServerFileInfoMap(localFileMetaData *FileMetaData) *FileMetaData {
 	fmt.Println("-_*_*_*_*_*_*_ Start updateServerFileInfoMap -_*_*_*_*_*_*_")
 	fmt.Println(localFileMetaData.Filename)
 	fmt.Println(localFileMetaData.Version)
 	fmt.Println(len(localFileMetaData.BlockHashList))
-	// newServerFileMetaData := &FileMetaData{}
-	serverFileMetaData.Filename = localFileMetaData.Filename
-	serverFileMetaData.Version = localFileMetaData.Version
-	serverFileMetaData.BlockHashList = make([]string, len(localFileMetaData.BlockHashList))
+	ServerFileMetaData := &FileMetaData{}
+	ServerFileMetaData.Filename = localFileMetaData.Filename
+	ServerFileMetaData.Version = localFileMetaData.Version
+	ServerFileMetaData.BlockHashList = make([]string, len(localFileMetaData.BlockHashList))
 	for i, hashcode := range localFileMetaData.BlockHashList {
-		serverFileMetaData.BlockHashList[i] = hashcode
+		ServerFileMetaData.BlockHashList[i] = hashcode
 	}
-	fmt.Println("\t", serverFileMetaData.Filename, serverFileMetaData.Version)
-	for _, blockHash := range serverFileMetaData.BlockHashList {
+	fmt.Println("\t", ServerFileMetaData.Filename, ServerFileMetaData.Version)
+	for _, blockHash := range ServerFileMetaData.BlockHashList {
 		fmt.Println("\t", blockHash)
 	}
 	fmt.Println("-_*_*_*_*_*_*_ Finish updateServerFileInfoMap -_*_*_*_*_*_*_")
-	// return newServerFileMetaData
+	return ServerFileMetaData
 }
 
 // download(client, filename, serverFileMetaData)
