@@ -7,7 +7,7 @@ import (
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
-var lock sync.Mutex
+var locker sync.Mutex
 
 type MetaStore struct {
 	FileMetaMap    map[string]*FileMetaData
@@ -19,8 +19,8 @@ func (m *MetaStore) GetFileInfoMap(ctx context.Context, _ *emptypb.Empty) (*File
 	// panic("todo")
 
 	// lock := sync.Mutex{}
-	lock.Lock()
-	defer lock.Unlock()
+	locker.Lock()
+	defer locker.Unlock()
 
 	fileinfomap := &FileInfoMap{}
 	fileinfomap.FileInfoMap = m.FileMetaMap
@@ -31,8 +31,8 @@ func (m *MetaStore) UpdateFile(ctx context.Context, fileMetaData *FileMetaData) 
 	// panic("todo")
 
 	// lock := sync.Mutex{}
-	lock.Lock()
-	defer lock.Unlock()
+	locker.Lock()
+	defer locker.Unlock()
 
 	filename := fileMetaData.Filename
 	newVersion := &Version{}
@@ -56,8 +56,8 @@ func (m *MetaStore) GetBlockStoreAddr(ctx context.Context, _ *emptypb.Empty) (*B
 	// panic("todo")
 
 	// lock := sync.Mutex{}
-	lock.Lock()
-	defer lock.Unlock()
+	locker.Lock()
+	defer locker.Unlock()
 
 	return &BlockStoreAddr{Addr: m.BlockStoreAddr}, nil
 }

@@ -14,8 +14,8 @@ func (bs *BlockStore) GetBlock(ctx context.Context, blockHash *BlockHash) (*Bloc
 	// Retrieves a block indexed by hash value h
 
 	// lock := sync.Mutex{}
-	lock.Lock()
-	defer lock.Unlock()
+	locker.Lock()
+	defer locker.Unlock()
 
 	return bs.BlockMap[blockHash.Hash], nil
 }
@@ -28,8 +28,8 @@ func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, err
 	// hashcode := hex.EncodeToString(hashBytes)
 
 	// lock := sync.Mutex{}
-	lock.Lock()
-	defer lock.Unlock()
+	locker.Lock()
+	defer locker.Unlock()
 	hashcode := GetBlockHashString(block.BlockData)
 	bs.BlockMap[hashcode] = block
 	_, flag := bs.BlockMap[hashcode]
@@ -46,8 +46,8 @@ func (bs *BlockStore) HasBlocks(ctx context.Context, blockHashesIn *BlockHashes)
 	// panic("todo")
 
 	// lock := sync.Mutex{}
-	lock.Lock()
-	defer lock.Unlock()
+	locker.Lock()
+	defer locker.Unlock()
 
 	blockHashesOut := &BlockHashes{}
 	for _, blockHash := range blockHashesIn.Hashes {
