@@ -73,7 +73,7 @@ func ClientSync(client RPCClient) {
 				continue
 			} else if localFileMetaData.Version > serverFileMetaData.Version {
 				// the server file is behind the client file
-				serverFileInfoMap[filename] = updateServerFileInfoMap(localFileMetaData)
+				// serverFileInfoMap[filename] = updateServerFileInfoMap(localFileMetaData)
 				err := upload(client, filename, localFileMetaData)
 				if err != nil {
 					log.Println("upload failed")
@@ -90,7 +90,7 @@ func ClientSync(client RPCClient) {
 			// server does not have the file --> update it to the server file info map
 			// newFileMetaData := &FileMetaData{}
 			serverFileInfoMap[filename] = &FileMetaData{}
-			serverFileInfoMap[filename] = updateServerFileInfoMap(localFileMetaData)
+			updateServerFileInfoMap(localFileMetaData, serverFileInfoMap[filename])
 			// serverFileInfoMap[filename] = newFileMetaData
 			PrintMetaMap(serverFileInfoMap)
 			fmt.Println("------------- start upload new local file to server -------------")
@@ -326,20 +326,24 @@ func updateClientFileInfoMap(serverFileMetaData *FileMetaData) (newClientFileMet
 	return newClientFileMetaData
 }
 
-func updateServerFileInfoMap(localFileMetaData *FileMetaData) *FileMetaData {
+func updateServerFileInfoMap(localFileMetaData *FileMetaData, serverFileMetaData *FileMetaData) {
 	fmt.Println("-_*_*_*_*_*_*_ Start updateServerFileInfoMap -_*_*_*_*_*_*_")
 	fmt.Println(localFileMetaData.Filename)
 	fmt.Println(localFileMetaData.Version)
 	fmt.Println(len(localFileMetaData.BlockHashList))
-	newServerFileMetaData := &FileMetaData{}
-	newServerFileMetaData.Filename = localFileMetaData.Filename
-	newServerFileMetaData.Version = localFileMetaData.Version
-	newServerFileMetaData.BlockHashList = make([]string, len(localFileMetaData.BlockHashList))
+	// newServerFileMetaData := &FileMetaData{}
+	serverFileMetaData.Filename = localFileMetaData.Filename
+	serverFileMetaData.Version = localFileMetaData.Version
+	serverFileMetaData.BlockHashList = make([]string, len(localFileMetaData.BlockHashList))
 	for i, hashcode := range localFileMetaData.BlockHashList {
-		newServerFileMetaData.BlockHashList[i] = hashcode
+		serverFileMetaData.BlockHashList[i] = hashcode
+	}
+	fmt.Println("\t", serverFileMetaData.Filename, serverFileMetaData.Version)
+	for _, blockHash := range serverFileMetaData.BlockHashList {
+		fmt.Println("\t", blockHash)
 	}
 	fmt.Println("-_*_*_*_*_*_*_ Finish updateServerFileInfoMap -_*_*_*_*_*_*_")
-	return newServerFileMetaData
+	// return newServerFileMetaData
 }
 
 // download(client, filename, serverFileMetaData)
