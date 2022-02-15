@@ -21,8 +21,8 @@ func ClientSync(client RPCClient) {
 	}
 
 	dirfileMap := make(map[string]os.FileInfo)
-	for _, file := range baseFiles {
-		dirfileMap[file.Name()] = file
+	for _, fileOsInfo := range baseFiles {
+		dirfileMap[fileOsInfo.Name()] = fileOsInfo
 	}
 
 	// check index.txt
@@ -183,7 +183,7 @@ func checkChange(filehashlist []string, oldidxfilehashlist []string) (changeflg 
 		}
 		return false
 	}
-	return false
+	return true
 }
 
 func handleDelFiles(newFileInfoMap *map[string]*FileMetaData, dirFileInfoMap map[string]os.FileInfo, idxFileInfoMap map[string]*FileMetaData, changeFlag *map[string]string) {
