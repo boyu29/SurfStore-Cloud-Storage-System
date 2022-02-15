@@ -93,6 +93,7 @@ func ClientSync(client RPCClient) {
 			// newFileMetaData := &FileMetaData{}
 			newFileMetaData := &FileMetaData{}
 			updateServerFileInfoMap(localFileMetaData, newFileMetaData)
+			serverFileInfoMap[filename] = newFileMetaData
 			PrintMetaMap(serverFileInfoMap)
 			fmt.Println("------------- start upload new local file to server -------------")
 			err := upload(client, filename, localFileMetaData)
