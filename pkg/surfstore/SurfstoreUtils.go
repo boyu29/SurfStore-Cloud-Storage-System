@@ -122,7 +122,7 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 		fmt.Println("************** Generating Hash List **************")
 		dirfilecontentHashlist := genHashlist(client, filename, fileosInfo) // [h0 h1 h2 ... hn]
 		fmt.Println("************** Finish Generating Hash List **************")
-		var newfileMetaData *FileMetaData
+		newfileMetaData := &FileMetaData{}
 
 		// check if this file exists in oldFileInforMap(modified/unchanged)
 		fmt.Println("************** Check if this file exists in oldFileInforMap **************")
@@ -177,7 +177,6 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 			// newfileMetaData.Version = 1
 			// newfileMetaData.BlockHashList = dirfilecontentHashlist
 			// newFileInfoMap[filename] = newfileMetaData
-			newfileMetaData := &FileMetaData{}
 			fmt.Println("************** Begin Handle new files **************")
 			fmt.Println(len(dirfilecontentHashlist))
 			fmt.Println(filename)
@@ -269,7 +268,7 @@ func checkChange(filehashlist []string, oldidxfilehashlist []string) bool {
 
 func handleDelFiles(newFileInfoMap *map[string]*FileMetaData, dirFileInfoMap map[string]os.FileInfo, idxFileInfoMap map[string]*FileMetaData, changeFlag *map[string]string) {
 	for filename, fileMetaData := range idxFileInfoMap {
-		var newfileMetaData *FileMetaData
+		newfileMetaData := &FileMetaData{}
 		// check if the files in the index.txt has been deleted
 		if _, ok := dirFileInfoMap[filename]; !ok {
 			// if deleted
