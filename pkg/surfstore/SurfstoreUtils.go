@@ -89,11 +89,12 @@ func ClientSync(client RPCClient) {
 		} else {
 			fmt.Println("------------- start update new local file to ServerFileInfoMap -------------")
 			// server does not have the file --> update it to the server file info map
-			newFileMetaData := &FileMetaData{}
-			updateServerFileInfoMap(localFileMetaData, newFileMetaData)
-			// serverFileInfoMap[filename] = &FileMetaData{}
-			fmt.Println("\t", newFileMetaData.Filename, newFileMetaData.Version)
-			for _, blockHash := range newFileMetaData.BlockHashList {
+			// newFileMetaData := &FileMetaData{}
+			// updateServerFileInfoMap(localFileMetaData, newFileMetaData)
+			serverFileInfoMap[filename] = &FileMetaData{}
+			updateServerFileInfoMap(localFileMetaData, serverFileInfoMap[filename])
+			fmt.Println("\t", serverFileInfoMap[filename].Filename, serverFileInfoMap[filename].Version)
+			for _, blockHash := range serverFileInfoMap[filename].BlockHashList {
 				fmt.Println("\t", blockHash)
 			}
 			PrintMetaMap(serverFileInfoMap)
