@@ -111,6 +111,8 @@ func ClientSync(client RPCClient) {
 func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileInfoMap map[string]*FileMetaData) (returnmap map[string]*FileMetaData, returnFlag map[string]string) {
 	newFileInfoMap := make(map[string]*FileMetaData)
 	changeFlag := make(map[string]string)
+	fmt.Println("************** Check the num of local files **************")
+	fmt.Println(len(dirFileInfoMap))
 	// handle files in the base directory: new to index.txt or already exists in index.txt(modified or unchanged)
 	for filename, fileosInfo := range dirFileInfoMap {
 		// get content of the files from the base directory
