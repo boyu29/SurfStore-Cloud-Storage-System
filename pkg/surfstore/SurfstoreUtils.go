@@ -178,6 +178,7 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 			// newfileMetaData.BlockHashList = dirfilecontentHashlist
 			// newFileInfoMap[filename] = newfileMetaData
 			fmt.Println("************** Begin Handle new files **************")
+			fmt.Println(len(dirfilecontentHashlist))
 			newfileMetaData.Filename = filename
 			newfileMetaData.Version = 1
 			for i, hashcode := range dirfilecontentHashlist {
