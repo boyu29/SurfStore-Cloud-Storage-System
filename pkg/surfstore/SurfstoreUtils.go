@@ -130,6 +130,7 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 			// if exists
 			//check if it's modified
 			changeflg := checkChange(dirfilecontentHashlist, oldfileMetaData.BlockHashList) // true: changed | false: unchanged
+			fmt.Println("************** Check checkChange **************")
 			if changeflg {
 				// if modified --> newfilemetadata: version+1
 				changeFlag[filename] = "modified"
@@ -141,12 +142,13 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 				// 	modifiedfileMetaData.BlockHashList[i] = hashcode
 				// }
 				// newFileInfoMap[filename] = modifiedfileMetaData
-
+				fmt.Println("************** Begin Handle  changed files **************")
 				newfileMetaData.Filename = oldfileMetaData.Filename
 				newfileMetaData.Version = oldfileMetaData.Version + 1
 				for i, hashcode := range dirfilecontentHashlist {
 					newfileMetaData.BlockHashList[i] = hashcode
 				}
+				fmt.Println("************** End handle changed files **************")
 			} else {
 				// if not modified --> add data to newfilemetadatamap
 				changeFlag[filename] = "unmodified"
@@ -159,12 +161,13 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 				// 	unmodifiedfileMetaData.BlockHashList[i] = hashcode
 				// }
 				// newFileInfoMap[filename] = unmodifiedfileMetaData
-
+				fmt.Println("************** Begin handle unchanged files **************")
 				newfileMetaData.Filename = oldfileMetaData.Filename
 				newfileMetaData.Version = oldfileMetaData.Version
 				for i, hashcode := range dirfilecontentHashlist {
 					newfileMetaData.BlockHashList[i] = hashcode
 				}
+				fmt.Println("************** End handle unchanged files **************")
 			}
 		} else {
 			// if not exists(new file)
@@ -174,13 +177,13 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 			// newfileMetaData.Version = 1
 			// newfileMetaData.BlockHashList = dirfilecontentHashlist
 			// newFileInfoMap[filename] = newfileMetaData
-
+			fmt.Println("************** Begin Handle new files **************")
 			newfileMetaData.Filename = filename
 			newfileMetaData.Version = 1
 			for i, hashcode := range dirfilecontentHashlist {
 				newfileMetaData.BlockHashList[i] = hashcode
 			}
-
+			fmt.Println("************** End handle new files **************")
 		}
 		newFileInfoMap[filename] = newfileMetaData
 	}
@@ -214,6 +217,7 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 		}*/
 
 	// handle files does not exists in the index.txt(deleted)
+	fmt.Println("************** Check HandleDelFiles **************")
 	handleDelFiles(&newFileInfoMap, dirFileInfoMap, oldFileInfoMap, &changeFlag)
 
 	return newFileInfoMap, changeFlag
