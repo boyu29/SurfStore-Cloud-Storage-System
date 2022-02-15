@@ -195,9 +195,8 @@ func idxUpdate(client RPCClient, dirFileInfoMap map[string]os.FileInfo, oldFileI
 				changeFlag[filename] = "deleted"
 				newfileMetaData.Filename = oldfilemetadata.Filename
 				newfileMetaData.Version = oldfilemetadata.Version + 1
-				zerohash := make([]string, 1)
-				zerohash[0] = "0"
-				newfileMetaData.BlockHashList = zerohash
+				newfileMetaData.BlockHashList = make([]string, 1)
+				newfileMetaData.BlockHashList[0] = "0"
 			}
 			newFileInfoMap[filename] = newfileMetaData
 		}
@@ -247,36 +246,33 @@ func checkChange(filehashlist []string, oldidxfilehashlist []string) bool {
 	return true
 }
 
-func handleDelFiles(newFileInfoMap *map[string]*FileMetaData, dirFileInfoMap map[string]os.FileInfo, idxFileInfoMap map[string]*FileMetaData, changeFlag *map[string]string) {
-	for filename, fileMetaData := range idxFileInfoMap {
-		// check if the files in the index.txt has been deleted
-		if _, ok := dirFileInfoMap[filename]; !ok {
-			// if deleted
-			if len(fileMetaData.BlockHashList) == 1 && fileMetaData.BlockHashList[0] == "0" {
-				// if it has been recorded as deleted in the index.txt
-				(*changeFlag)[filename] = "unmodified"
-				newfileMetaData := &FileMetaData{}
-				newfileMetaData.Filename = filename
-				newfileMetaData.Version = fileMetaData.Version
-				newfileMetaData.BlockHashList = fileMetaData.BlockHashList
-				(*newFileInfoMap)[filename] = newfileMetaData
-			} else {
-				// if it's deleted in base dir but not deleted in the index.txt
-				(*changeFlag)[filename] = "modified"
-				zerohash := make([]string, 1)
-				zerohash[0] = "0"
-				newfileMetaData := &FileMetaData{}
-				newfileMetaData.Filename = filename
-				newfileMetaData.Version = fileMetaData.Version + 1
-				newfileMetaData.BlockHashList = zerohash
-				(*newFileInfoMap)[filename] = newfileMetaData
-			}
-
-		} else {
-			continue
-		}
-	}
-}
+// func handleDelFiles(newFileInfoMap *map[string]*FileMetaData, dirFileInfoMap map[string]os.FileInfo, idxFileInfoMap map[string]*FileMetaData, changeFlag *map[string]string) {
+// 	for filename, fileMetaData := range idxFileInfoMap {
+// 		// check if the files in the index.txt has been deleted
+// 		if _, ok := dirFileInfoMap[filename]; !ok {
+// 			// if deleted
+// 			if len(fileMetaData.BlockHashList) == 1 && fileMetaData.BlockHashList[0] == "0" {
+// 				// if it has been recorded as deleted in the index.txt
+// 				(*changeFlag)[filename] = "unmodified"
+// 				newfileMetaData := &FileMetaData{}
+// 				newfileMetaData.Filename = filename
+// 				newfileMetaData.Version = fileMetaData.Version
+// 				newfileMetaData.BlockHashList = fileMetaData.BlockHashList
+// 				(*newFileInfoMap)[filename] = newfileMetaData
+// 			} else {
+// 				// if it's deleted in base dir but not deleted in the index.txt
+// 				(*changeFlag)[filename] = "modified"
+// 				zerohash := make([]string, 1)
+// 				zerohash[0] = "0"
+// 				newfileMetaData := &FileMetaData{}
+// 				newfileMetaData.Filename = filename
+// 				newfileMetaData.Version = fileMetaData.Version + 1
+// 				newfileMetaData.BlockHashList = zerohash
+// 				(*newFileInfoMap)[filename] = newfileMetaData
+// 			}
+// 		}
+// 	}
+// }
 
 // updateClientFileInfoMap(client, &localFileMetaData, serverFileMetaData)
 
