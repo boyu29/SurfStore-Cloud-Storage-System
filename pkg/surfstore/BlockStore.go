@@ -2,6 +2,7 @@ package surfstore
 
 import (
 	context "context"
+	"errors"
 	"sync"
 )
 
@@ -32,8 +33,12 @@ func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, err
 	defer lock.Unlock()
 	hashcode := GetBlockHashString(block.BlockData)
 	bs.BlockMap[hashcode] = block
+	_, flag := bs.BlockMap[hashcode]
+	if flag {
+		return &Success{Flag: true}, nil
+	}
 
-	return &Success{Flag: true}, nil
+	return nil, errors.New("blockstore put block failed")
 }
 
 // Given a list of hashes “in”, returns a list containing the
