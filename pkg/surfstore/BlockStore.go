@@ -22,16 +22,14 @@ func (bs *BlockStore) GetBlock(ctx context.Context, blockHash *BlockHash) (*Bloc
 
 func (bs *BlockStore) PutBlock(ctx context.Context, block *Block) (*Success, error) {
 	// panic("todo")
-	// hash := sha256.New()
-	// hash.Write(block.BlockData)
-	// hashBytes := hash.Sum(nil)
-	// hashcode := hex.EncodeToString(hashBytes)
 
 	// lock := sync.Mutex{}
 	locker.Lock()
 	defer locker.Unlock()
 	hashcode := GetBlockHashString(block.BlockData)
-	bs.BlockMap[hashcode] = block
+	bs.BlockMap[hashcode] = &Block{}
+	bs.BlockMap[hashcode].BlockData = block.BlockData
+	bs.BlockMap[hashcode].BlockSize = block.BlockSize
 	_, flag := bs.BlockMap[hashcode]
 	if flag {
 		return &Success{Flag: true}, nil
