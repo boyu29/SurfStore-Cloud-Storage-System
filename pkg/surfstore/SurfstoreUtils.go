@@ -276,6 +276,7 @@ func download(client RPCClient, filename string, serverFileMetaData *FileMetaDat
 		if err != nil {
 			log.Println("Cannot remove file: ", err)
 		}
+		return
 	}
 
 	// write data to file
